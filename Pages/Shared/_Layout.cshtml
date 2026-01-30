@@ -1,0 +1,135 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - first_project</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+
+<body>
+    <header id="mainHeader">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand" asp-area="" asp-page="/Index">first_project</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
+                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Jobs</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">About</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Contact</a>
+                        </li>
+                    </ul>
+                    <div id="userControls" class="d-flex align-items-center">
+                        <span id="username" class="me-2">slkfkslj</span>
+                        <button id="logoutBtn" class="btn btn-primary">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer id="mainFooter" class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2026 - first_project - <a asp-area="" asp-page="/Privacy">Privacy</a>
+        </div>
+    </footer>
+
+
+
+
+    <script>
+const token = localStorage.getItem("token");
+const usernameSpan = document.getElementById("username");
+const logoutBtn = document.getElementById("logoutBtn");
+
+if (token) {
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+
+    
+        const fullNameClaim = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name";
+        const fullName = payload[fullNameClaim];
+
+        
+        if (usernameSpan) {
+            if (fullName && fullName.trim() !== "") {
+                usernameSpan.textContent = ` ${fullName}`;
+                usernameSpan.style.display = "inline";
+            } else {
+                usernameSpan.style.display = "none";
+            }
+        }
+
+        if (logoutBtn) {
+            logoutBtn.style.display = "inline-block";
+            logoutBtn.addEventListener("click", () => {
+                localStorage.removeItem("token");
+                window.location.href = "/Login"; 
+            });
+        }
+
+    } catch (error) {
+        console.error("Invalid token:", error);
+        if (usernameSpan) usernameSpan.style.display = "none";
+        if (logoutBtn) logoutBtn.style.display = "none";
+    }
+}
+</script>
+
+
+
+    <script>
+        (function () {
+            const token = localStorage.getItem("token");
+            const path = window.location.pathname.toLowerCase();
+
+            const isAuthPage = path === "/login" || path === "/register";
+            const header = document.getElementById("mainHeader");
+            const footer = document.getElementById("mainFooter");
+
+            if (!token) {
+                if (header) header.style.display = "none";
+                if (footer) footer.style.display = "none";
+            }
+
+            if (!token && !isAuthPage) {
+                // Not logged in → go to Login
+                window.location.href = "/Login";
+            }
+
+            if (token && isAuthPage) {
+                // Already logged in → go to Home
+                window.location.href = "/";
+            }
+        })();
+    </script>
+
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+
+</html>

@@ -1,0 +1,33 @@
+# Visual Studio / Rider / IDE files
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build outputs
+bin/
+obj/
+
+# Rider project files
+.idea/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# User secrets
+secrets.json
+*.pfx
+*.key
+*.pem
+
+# ASP.NET runtime files
+appsettings.*.json
+wwwroot/lib/
+
+# Logs
+*.log
+
+# SQLite database (optional if you don't want to push database)
+app.db
