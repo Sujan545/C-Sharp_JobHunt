@@ -1,0 +1,48 @@
+@page
+
+<h2>Edit Job</h2>
+
+<form id="editForm">
+    <input id="jobTitle" />
+    <input id="companyName" />
+    <input id="jobGeo" />
+    <textarea id="jobDescription"></textarea>
+    <button type="submit">Save</button>
+</form>
+
+<script>
+const id = new URLSearchParams(window.location.search).get("id");
+
+async function loadJob() {
+    const res = await fetch("/api/jobs");
+    const jobs = await res.json();
+    const job = jobs.find(j => j.id == id);
+
+    document.getElementById("jobTitle").value = job.jobTitle;
+    document.getElementById("companyName").value = job.companyName;
+    document.getElementById("jobGeo").value = job.jobGeo;
+    document.getElementById("jobDescription").value = job.jobDescription;
+}
+
+document.getElementById("editForm").addEventListener("submit", async e => {
+    e.preventDefault();
+
+    await fetch("/api/jobs/" + id, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + localStorage.getItem("token")
+        },
+        body: JSON.stringify({
+            jobTitle: jobTitle.value,
+            companyName: companyName.value,
+            jobGeo: jobGeo.value,
+            jobDescription: jobDescription.value
+        })
+    });
+
+    window.location.href = "/Jobs";
+});
+
+loadJob();
+</script>

@@ -1,0 +1,111 @@
+@page
+@{
+    ViewData["Title"] = "Create Job";
+}
+
+<h2 class="mb-4">Create Job</h2>
+
+<form id="jobForm">
+    <div class="mb-3">
+        <label>Job Title</label>
+        <input class="form-control" id="jobTitle" required />
+    </div>
+
+    <div class="mb-3">
+        <label>Slug</label>
+        <input class="form-control" id="jobSlug" required />
+    </div>
+
+    <div class="mb-3">
+        <label>Company Name</label>
+        <input class="form-control" id="companyName" required />
+    </div>
+
+    <div class="mb-3">
+        <label>Company Logo URL</label>
+        <input class="form-control" id="companyLogo" />
+    </div>
+
+    <div class="mb-3">
+        <label>Industry (comma separated)</label>
+        <input class="form-control" id="jobIndustry" />
+    </div>
+
+    <div class="mb-3">
+        <label>Job Type (comma separated)</label>
+        <input class="form-control" id="jobType" />
+    </div>
+
+    <div class="mb-3">
+        <label>Location</label>
+        <input class="form-control" id="jobGeo" />
+    </div>
+
+    <div class="mb-3">
+        <label>Level</label>
+        <input class="form-control" id="jobLevel" />
+    </div>
+
+    <div class="mb-3">
+        <label>Excerpt</label>
+        <textarea class="form-control" id="jobExcerpt"></textarea>
+    </div>
+
+    <div class="mb-3">
+        <label>Description</label>
+        <textarea class="form-control" id="jobDescription"></textarea>
+    </div>
+
+    <div class="mb-3">
+        <label>Apply URL</label>
+        <input class="form-control" id="url" />
+    </div>
+
+    <button class="btn btn-primary">Create Job</button>
+</form>
+
+<script>
+document.getElementById("jobForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+        alert("Not logged in!");
+        return;
+    }
+const job = {
+    jobTitle: jobTitle.value,
+    jobSlug: jobSlug.value,
+    companyName: companyName.value,
+    companyLogo: companyLogo.value,
+    jobIndustry: jobIndustry.value ? jobIndustry.value.split(",").map(x => x.trim()) : [],
+    jobType: jobType.value ? jobType.value.split(",").map(x => x.trim()) : [],
+    jobGeo: jobGeo.value,
+    jobLevel: jobLevel.value,
+    jobExcerpt: jobExcerpt.value,
+    jobDescription: jobDescription.value,
+    pubDate: new Date().toISOString(),
+    url: url.value
+};
+console.log(job);
+
+
+
+const res = await fetch("http://localhost:5003/api/jobs", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify(job)
+});
+
+console.log(res);
+
+if (!res.ok) {
+    const text = await res.text();
+    console.error("Failed:", res.status, text);
+}
+
+});
+</script>

@@ -1,0 +1,113 @@
+@page
+@model dynamic
+@{
+    ViewData["Title"] = "All Jobs";
+}
+
+<h2 class="mb-8 text-3xl font-bold tracking-tight text-gray-900">Explore Jobs</h2>
+
+<div id="jobList" class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3"></div>
+
+<script>
+async function loadJobs() {
+    const res = await fetch("/api/jobs");
+    const jobs = await res.json();
+
+    const token = localStorage.getItem("token");
+    const payload = token ? JSON.parse(atob(token.split('.')[1])) : null;
+    const userId = payload
+      ? payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"]
+      : null;
+
+    const container = document.getElementById("jobList");
+    container.innerHTML = "";
+
+    jobs.forEach(job => {
+        const jobType = Array.isArray(job.jobType) && job.jobType.length > 0
+            ? job.jobType[0]
+            : "Full Time";
+
+        container.innerHTML += `
+        <div class="group relative overflow-hidden rounded-2xl border border-gray-200/60 bg-white/80 p-6 shadow-lg backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
+
+          <div class="absolute inset-0 bg-gradient-to-br from-blue-50/60 via-transparent to-purple-50/60 opacity-0 transition group-hover:opacity-100"></div>
+
+          <div class="relative z-10">
+            <a href="${job.url}" target="_blank">
+              <div class="flex items-center gap-4">
+                <div class="h-12 w-12 rounded-xl bg-white shadow-inner ring-1 ring-gray-200 flex items-center justify-center">
+                  <img
+                    src="${job.companyLogo || '/logo-placeholder.png'}"
+                    alt="${job.companyName}"
+                    class="h-8 w-8 object-contain"
+                    loading="lazy"
+                    referrerpolicy="no-referrer"
+                  />
+                </div>
+
+                <div class="flex-1">
+                  <h3 class="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition">
+                    ${job.jobTitle}
+                  </h3>
+                  <p class="text-sm text-gray-500">${job.companyName}</p>
+                </div>
+              </div>
+
+              <div class="mt-4 flex flex-wrap items-center gap-3 text-sm text-gray-600">
+                <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1">📍 ${job.jobGeo}</span>
+                <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1">💼 ${jobType}</span>
+                <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1">🧱 ${job.jobLevel}</span>
+              </div>
+
+              <p class="mt-4 line-clamp-3 text-sm text-gray-600">
+                ${job.jobExcerpt || ""}
+              </p>
+            </a>
+
+            <div class="mt-6 flex items-center justify-between">
+              <span class="text-xs text-gray-400">
+                ${new Date(job.pubDate).toLocaleDateString()}
+              </span>
+
+              <div class="flex items-center gap-3">
+                <a href="${job.url}" target="_blank"
+                   class="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white shadow hover:bg-blue-700 transition">
+                  View →
+                </a>
+
+                ${job.authorId == userId ? `
+                  <button onclick="editJob(${job.id})"
+                          class="text-sm text-emerald-600 hover:underline">
+                    Edit
+                  </button>
+                  <button onclick="deleteJob(${job.id})"
+                          class="text-sm text-rose-600 hover:underline">
+                    Delete
+                  </button>
+                ` : ""}
+              </div>
+            </div>
+          </div>
+        </div>`;
+    });
+}
+
+function editJob(id) {
+    window.location.href = "/Jobs/Edit?id=" + id;
+}
+
+async function deleteJob(id) {
+    if (!confirm("Delete this job?")) return;
+
+    await fetch("/api/jobs/" + id, {
+        method: "DELETE",
+        headers: {
+            "Authorization": "Bearer " + localStorage.getItem("token")
+        }
+    });
+
+    loadJobs();
+}
+
+loadJobs();
+</script>
